@@ -15,29 +15,33 @@ var (
 )
 
 func TestShouldCreateANewCampaign(t *testing.T) {
+	assert := assert.New(t)
 	campaign, _ := NewCampaign(name, content, contacts)
 
-	assert.NotNil(t, campaign.ID)
-	assert.GreaterOrEqual(t, campaign.CreatedAt, createdAt)
-	assert.Equal(t, name, campaign.Name)
-	assert.Equal(t, content, campaign.Content )
-	assert.Equal(t, len(contacts), len(campaign.Contacts))
+	assert.NotNil( campaign.ID)
+	assert.GreaterOrEqual( campaign.CreatedAt, createdAt)
+	assert.Equal(name, campaign.Name)
+	assert.Equal( content, campaign.Content )
+	assert.Equal( len(contacts), len(campaign.Contacts))
 }
 
 func TestShouldValidateName(t *testing.T) {
+	assert := assert.New(t)
 	_, err := NewCampaign("", content, contacts)
 
-	assert.Equal(t,"name is required", err.Error())
+	assert.Equal("name is required", err.Error())
 }
 
 func TestShouldValidateContent(t *testing.T) {
+	assert := assert.New(t)
 	_, err := NewCampaign(name, "", contacts)
 
-	assert.Equal(t,"content is required", err.Error())
+	assert.Equal("content is required", err.Error())
 }
 
 func TestShouldValidateContacts(t *testing.T) {
+	assert := assert.New(t)
 	_, err := NewCampaign(name, content, []string{})
 
-	assert.Equal(t,"contacts is required", err.Error())
+	assert.Equal("contacts is required", err.Error())
 }
