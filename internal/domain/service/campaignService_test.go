@@ -20,10 +20,15 @@ func(r *repositoryMock) Save(campaign *model.Campaign) error {
 	return args.Error(0)
 }
 
+func(r *repositoryMock) Get() ([]model.Campaign, error) {
+	args := r.Called()
+	return []model.Campaign{}, args.Error(0)
+}
+
 var (
 	newCampaign = &contract.NewCampaignInput{
 	Name: "Campaign X",
-	Content: "Body",
+	Content: "Body Content",
 	Emails: []string{"john@mail.com", "mary@mail.com"},
 	}
 	service = CampaignService{}
@@ -59,7 +64,7 @@ func TestShouldValidateDomainError(t *testing.T) {
 
 	assert.Error(err)
 	assert.Empty(id)
-	assert.Equal("name is required", err.Error())
+	assert.Equal(err.Error(), "validation error")
 }
 
 func TestShouldValidateRepositorySave(t *testing.T) {
@@ -72,7 +77,9 @@ func TestShouldValidateRepositorySave(t *testing.T) {
 	service.Repository = mockedRepository
 	id, err := service.Create(newCampaign)
 
+	expectedError := internalerrors.ErrInternal{}
+
 	assert.Error(err)
 	assert.Empty(id)
-	assert.Equal(internalerrors.ErrInternal.Error(), err.Error())
+	assert.Equal(expectedError.Error(), err.Error())
 }
