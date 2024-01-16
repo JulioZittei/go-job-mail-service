@@ -1,0 +1,14 @@
+### CREATE CAMPAIGN
+POST http://localhost:3000/campaign
+
+{
+	"name": "Campanha de teste",
+	"content": "Conteúdo da campanha",
+	"emails": [
+		"john@mail.com"
+	]
+}
+
+
+### GET CAMPAIGNS
+GET http://localhost:3000/campaign
