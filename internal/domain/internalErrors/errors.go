@@ -1,5 +1,15 @@
 package internalerrors
 
-import "errors"
+type ErrorsParam struct {
+	Param string `json:"param"`
+	Message string `json:"message"`
+}
 
-var ErrInternal error = errors.New("Internal Server Error")
+type ErrorResponse struct {
+	Status string `json:"status"`
+	Code int `json:"code"`
+	Title string `json:"title"`
+	Detail string `json:"detail"`
+	Instance string `json:"instance"`
+	InvalidParams []ErrorsParam `json:"invalid_params"`
+}
