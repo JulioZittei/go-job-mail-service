@@ -19,7 +19,7 @@ func (s *CampaignService) Create(campaignInput *contract.NewCampaignInput) (id s
 
 	err = s.Repository.Save(campaign)
 	if err != nil {
-		return "", internalerrors.ErrInternal
+		return "", internalerrors.NewErrInternal()
 	}
 	
 	return campaign.ID, err
