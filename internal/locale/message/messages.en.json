@@ -1,0 +1,9 @@
+{
+  "MIN": "must be at least {{.Arg1}}.",
+  "MAX": "must be at most {{.Arg1}}.",
+  "EMAIL": "must be well-formed.",
+  "BAD_REQUEST": "Invalid Request. Please verify the data sent.",
+  "UNPROCESSABLE_ENTITY": "Validation errors. Please verify the data sent.",
+  "INTERNAL_SERVER_ERROR": "Internal Server Error. Please try again later.",
+  "REQUIRED": "is required."
+}
