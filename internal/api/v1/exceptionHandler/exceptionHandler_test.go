@@ -1,6 +1,7 @@
 package exceptionhandler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -11,8 +12,17 @@ import (
 )
 func TestShouldHandlerResponseWhenCreateCampaign(t *testing.T) {
 	assert := assert.New(t)
+
+	type bodyTest struct {
+		ID string `json:"id"`
+	}
+
+	objectExpected := bodyTest{
+		ID: "idtest",
+	}
+
 	controller := func(w http.ResponseWriter, r *http.Request) (interface{}, int, error ) {
-		return map[string]string{"id": "id"}, 201, nil
+		return objectExpected, 201, nil
 	}
 
 	handler := ExceptionHandler(controller)
@@ -22,8 +32,11 @@ func TestShouldHandlerResponseWhenCreateCampaign(t *testing.T) {
 
 	handler.ServeHTTP(res, req)
 
+	objectReturned := bodyTest{}
+	json.Unmarshal(res.Body.Bytes(), &objectReturned)
+
 	assert.Equal(http.StatusCreated, res.Code)
-	assert.Contains(res.Body.String(), "id")
+	assert.Equal(objectExpected, objectReturned)
 }
 
 func TestShouldHandlerErrorWhenControllerReturnsInternalError(t *testing.T) {

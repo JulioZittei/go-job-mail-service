@@ -19,16 +19,15 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	service := service.CampaignService{
+	service := service.CampaignServiceImpl{
 		Repository: &database.CampaignRepository{},
 	}
 
 	controller := &controller.CampaignController{
-		CampaignService: service,
+		CampaignService: &service,
 	}
 	
 	r.Post("/campaign", exceptionhandler.ExceptionHandler(controller.CampaignPost))
-	r.Get("/campaign", exceptionhandler.ExceptionHandler(controller.CampaignGet))
 
 	http.ListenAndServe(":3000", r)
 }

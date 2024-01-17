@@ -31,7 +31,7 @@ var (
 	Content: "Body Content",
 	Emails: []string{"john@mail.com", "mary@mail.com"},
 	}
-	service = CampaignService{}
+	service = CampaignServiceImpl{}
 )
 
 func TestShouldCreateAndSaveCampaign(t *testing.T) {

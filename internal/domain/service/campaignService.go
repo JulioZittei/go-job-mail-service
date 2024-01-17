@@ -7,11 +7,15 @@ import (
 	"github.com/JulioZittei/go-job-mail-service/internal/domain/repository"
 )
 
-type CampaignService struct {
+type CampaignService interface {
+	Create(campaignInput *contract.NewCampaignInput) (id string, err error)
+}
+
+type CampaignServiceImpl struct {
 	Repository repository.Repository
 }
 
-func (s *CampaignService) Create(campaignInput *contract.NewCampaignInput) (id string, err error) {
+func (s *CampaignServiceImpl) Create(campaignInput *contract.NewCampaignInput) (id string, err error) {
 	campaign, err := model.NewCampaign(campaignInput.Name, campaignInput.Content, campaignInput.Emails)
 	if err != nil {
 		return "", err
