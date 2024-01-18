@@ -26,6 +26,7 @@ func TestShouldCreateANewCampaign(t *testing.T) {
 	assert.Equal(name, campaign.Name)
 	assert.Equal( content, campaign.Content )
 	assert.Equal( len(contacts), len(campaign.Contacts))
+	assert.Equal(Pending, campaign.Status)
 }
 
 func TestShouldValidateNameMin(t *testing.T) {
