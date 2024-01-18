@@ -22,7 +22,12 @@ func(r *repositoryMock) Save(campaign *model.Campaign) error {
 
 func(r *repositoryMock) Get() ([]model.Campaign, error) {
 	args := r.Called()
-	return []model.Campaign{}, args.Error(0)
+	return []model.Campaign{}, args.Error(1)
+}
+
+func(r *repositoryMock) GetById(id string) (*model.Campaign, error) {
+	args := r.Called()
+	return &model.Campaign{}, args.Error(1)
 }
 
 var (

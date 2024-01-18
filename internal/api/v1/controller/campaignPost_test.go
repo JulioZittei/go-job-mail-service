@@ -23,6 +23,11 @@ func (s *serviceMock) Create(campaignInput *contract.NewCampaignInput) (id strin
 	return args.String(0), args.Error(1)
 }
 
+func (s *serviceMock) GetById(id string) (*contract.CampaignOutput, error) {
+	args := s.Called(id)
+	return &contract.CampaignOutput{}, args.Error(1)
+}
+
 var (
 	controller = CampaignController{}
 )
