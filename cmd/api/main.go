@@ -28,6 +28,7 @@ func main() {
 	}
 	
 	r.Post("/campaign", exceptionhandler.ExceptionHandler(controller.CampaignPost))
+	r.Get("/campaign/{id}", exceptionhandler.ExceptionHandler(controller.CampaignGetById))
 
 	http.ListenAndServe(":3000", r)
 }

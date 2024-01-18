@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgresql_mail_job_service
+    environment:
+      POSTGRES_USER: mail_service_job_user
+      POSTGRES_PASSWORD: mail_service_job_pass
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"

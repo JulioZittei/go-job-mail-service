@@ -10,31 +10,16 @@ import (
 
 	"github.com/JulioZittei/go-job-mail-service/internal/domain/contract"
 	internalerrors "github.com/JulioZittei/go-job-mail-service/internal/domain/internalErrors"
+	mockTests "github.com/JulioZittei/go-job-mail-service/internal/test/mocks"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-type serviceMock struct {
-	mock.Mock
-}
-
-func (s *serviceMock) Create(campaignInput *contract.NewCampaignInput) (id string, err error) {
-	args := s.Called(campaignInput)
-	return args.String(0), args.Error(1)
-}
-
-func (s *serviceMock) GetById(id string) (*contract.CampaignOutput, error) {
-	args := s.Called(id)
-	return &contract.CampaignOutput{}, args.Error(1)
-}
-
-var (
-	controller = CampaignController{}
-)
 
 func TestShouldCreateAndSaveACampaign(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(serviceMock)
+	serviceMocked := new(mockTests.CampaignServiceMock)
 
 	bodyExpected := map[string]string{
 		"id": "idtest",
@@ -57,7 +42,9 @@ func TestShouldCreateAndSaveACampaign(t *testing.T) {
 		return true
 	})).Return("idtest", nil)
 
-	controller.CampaignService = serviceMocked
+	controller := CampaignController{
+		CampaignService: serviceMocked,
+	}
 
 	req, _ := http.NewRequest("POST", "/campaign", &buf)
 	res := httptest.NewRecorder()
@@ -69,9 +56,9 @@ func TestShouldCreateAndSaveACampaign(t *testing.T) {
 	assert.Equal(bodyExpected, json)
 }
 
-func TestShouldReturnErrorWhenSomethingWrong(t *testing.T) {
+func TestShouldReturnErrorWhenSaveACampaign(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(serviceMock)
+	serviceMocked := new(mockTests.CampaignServiceMock)
 
 	requestBody := contract.NewCampaignInput{
 		Name: "Teste",
@@ -85,7 +72,9 @@ func TestShouldReturnErrorWhenSomethingWrong(t *testing.T) {
 
 	serviceMocked.On("Create", mock.Anything).Return("", internalerrors.NewErrInternal())
 
-	controller.CampaignService = serviceMocked
+	controller := CampaignController{
+		CampaignService: serviceMocked,
+	}
 
 	req, _ := http.NewRequest("POST", "/campaign", &buf)
 	res := httptest.NewRecorder()
@@ -99,7 +88,7 @@ func TestShouldReturnErrorWhenSomethingWrong(t *testing.T) {
 
 func TestShouldReturnErrorWhenSendMalFormedBody(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(serviceMock)
+	serviceMocked := new(mockTests.CampaignServiceMock)
 	
 	requestBody  := strings.NewReader(`{
 		"name": "Campanha de teste",
@@ -109,7 +98,9 @@ func TestShouldReturnErrorWhenSendMalFormedBody(t *testing.T) {
 		]
 	}`)
 
-	controller.CampaignService = serviceMocked
+	controller := CampaignController{
+		CampaignService: serviceMocked,
+	}
 
 	req, _ := http.NewRequest("POST", "/campaign", requestBody)
 	res := httptest.NewRecorder()
@@ -119,41 +110,4 @@ func TestShouldReturnErrorWhenSendMalFormedBody(t *testing.T) {
 	assert.Nil(json)
 	assert.Equal(400, status)
 	assert.Equal(internalerrors.NewErrBadRequest().Error(), err.Error())
-}
-
-func TestShouldGetListOfCampaigns(t *testing.T) {
-	assert := assert.New(t)
-	serviceMocked := new(serviceMock)
-
-	bodyExpected := map[string]string{
-		"id": "idtest",
-	}
-
-	requestBody := contract.NewCampaignInput{
-		Name: "Teste",
-		Content: "Content Test",
-		Emails: []string{
-			"john@mail.com",
-		},
-	}
-	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(requestBody)
-
-	serviceMocked.On("Create", mock.MatchedBy(func(campaign *contract.NewCampaignInput) bool {
-		if campaign.Name != requestBody.Name || campaign.Content != requestBody.Content || len(campaign.Emails) != len(requestBody.Emails) {
-			return false
-		}
-		return true
-	})).Return("idtest", nil)
-
-	controller.CampaignService = serviceMocked
-
-	req, _ := http.NewRequest("POST", "/campaign", &buf)
-	res := httptest.NewRecorder()
-
-	json, status, err := controller.CampaignPost(res, req)
-
-	assert.Nil(err)
-	assert.Equal(201, status)
-	assert.Equal(bodyExpected, json)
 }
