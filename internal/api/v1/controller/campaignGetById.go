@@ -11,8 +11,8 @@ func (c *CampaignController) CampaignGetById(w http.ResponseWriter, r *http.Requ
 
 	campaign, err := c.CampaignService.GetById(id)
 	if err != nil {
-		return nil, 500, err
+		return nil, http.StatusInternalServerError, err
 	}
 
-	return campaign, 200, err
+	return campaign, http.StatusOK, err
 }
