@@ -10,21 +10,21 @@ import (
 type ErrCampaignNotFound struct {
 	StatusCode int
 	StatusText string
-	Title string
-	Detail string
+	Title      string
+	Detail     string
 }
 
-func NewErrCampaignNotFound() *ErrBadRequest {
+func NewErrCampaignNotFound() *ErrCampaignNotFound {
 	statusCode := http.StatusNotFound
 	statusText := strings.ToUpper(http.StatusText(statusCode))
 	statusText = strings.Replace(statusText, " ", "_", -1)
 	title, _ := message.GetMessage(statusText)
 
-	return &ErrBadRequest{
+	return &ErrCampaignNotFound{
 		StatusCode: statusCode,
 		StatusText: statusText,
-		Title: title,
-		Detail: "Campaign not found.",
+		Title:      title,
+		Detail:     "Campaign not found.",
 	}
 }
 
