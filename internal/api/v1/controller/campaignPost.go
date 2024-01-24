@@ -12,15 +12,15 @@ func (c *CampaignController) CampaignPost(w http.ResponseWriter, r *http.Request
 	var requestBody = contract.NewCampaignInput{}
 	err := render.DecodeJSON(r.Body, &requestBody)
 	if err != nil {
-		return nil, 400, internalerrors.NewErrBadRequest()
+		return nil, http.StatusBadRequest, internalerrors.NewErrBadRequest()
 	}
 
 	id, err := c.CampaignService.Create(&requestBody)
 	if err != nil {
-		return nil, 500, err
+		return nil, http.StatusInternalServerError, err
 	}
 
 	return map[string]string{
 		"id": id,
-	}, 201, nil
+	}, http.StatusCreated, nil
 }
