@@ -1,32 +1,38 @@
 package database
 
 import (
-	internalerrors "github.com/JulioZittei/go-job-mail-service/internal/domain/internalErrors"
 	"github.com/JulioZittei/go-job-mail-service/internal/domain/model"
+	"gorm.io/gorm"
 )
 
 type CampaignRepository struct {
-	campaigns []model.Campaign
+	Db *gorm.DB
 }
 
-
 func (cr *CampaignRepository) Save(campaign *model.Campaign) error {
-	cr.campaigns = append(cr.campaigns, *campaign)
-	return nil
+	tx := cr.Db.Create(campaign)
+	return tx.Error
+}
+
+func (cr *CampaignRepository) Update(campaign *model.Campaign) error {
+	tx := cr.Db.Save(campaign)
+	return tx.Error
 }
 
 func (cr *CampaignRepository) Get() ([]model.Campaign, error) {
-	if len(cr.campaigns) == 0 {
-		return []model.Campaign{}, nil
-	}
-	return cr.campaigns, nil
+	var campaigns []model.Campaign
+	tx := cr.Db.Find(&campaigns)
+	return campaigns, tx.Error
 }
 
 func (cr *CampaignRepository) GetById(id string) (*model.Campaign, error) {
-	for _, v := range cr.campaigns {
-		if v.ID == id {
-			return &v, nil
-		}
-	}
-	return nil, internalerrors.NewErrCampaignNotFound()
+	var campaign model.Campaign
+	tx := cr.Db.Preload("Contacts").First(&campaign, "id = ?", id)
+	return &campaign, tx.Error
+}
+
+func (cr *CampaignRepository) Delete(campaign *model.Campaign) error {
+
+	tx := cr.Db.Select("Contacts").Delete(campaign)
+	return tx.Error
 }
