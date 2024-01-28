@@ -1,36 +1,19 @@
 package controller
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/JulioZittei/go-job-mail-service/internal/domain/contract"
 	internalerrors "github.com/JulioZittei/go-job-mail-service/internal/domain/internalErrors"
-	mockTests "github.com/JulioZittei/go-job-mail-service/internal/test/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-func setup(requestBody contract.NewCampaignInput, createdByExpected string) (*http.Request, *httptest.ResponseRecorder) {
-	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(requestBody)
-	req, _ := http.NewRequest("POST", "/campaign", &buf)
-	ctx := context.WithValue(req.Context(), EMAIL_KEY, createdByExpected)
-	req = req.WithContext(ctx)
-	res := httptest.NewRecorder()
-
-	return req, res
-}
-
 func TestShouldCreateAndSaveACampaign(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(mockTests.CampaignServiceMock)
+	setup()
 
 	bodyExpected := map[string]string{
 		"id": "idtest",
@@ -57,7 +40,9 @@ func TestShouldCreateAndSaveACampaign(t *testing.T) {
 		CampaignService: serviceMocked,
 	}
 
-	req, res := setup(requestBody, createdByExpected)
+	req, res := newReqAndRecord("POST", "/campaign", requestBody)
+
+	req = addParamToContext(req, EMAIL_KEY, createdByExpected)
 
 	json, status, err := controller.CampaignPost(res, req)
 
@@ -68,7 +53,7 @@ func TestShouldCreateAndSaveACampaign(t *testing.T) {
 
 func TestShouldReturnErrorWhenSaveACampaign(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(mockTests.CampaignServiceMock)
+	setup()
 
 	createdByExpected := "teste@teste.com"
 
@@ -82,11 +67,9 @@ func TestShouldReturnErrorWhenSaveACampaign(t *testing.T) {
 
 	serviceMocked.On("Create", mock.Anything).Return("", internalerrors.NewErrInternal())
 
-	controller := CampaignController{
-		CampaignService: serviceMocked,
-	}
+	req, res := newReqAndRecord("POST", "/campaign", requestBody)
 
-	req, res := setup(requestBody, createdByExpected)
+	req = addParamToContext(req, EMAIL_KEY, createdByExpected)
 
 	json, status, err := controller.CampaignPost(res, req)
 
@@ -97,7 +80,7 @@ func TestShouldReturnErrorWhenSaveACampaign(t *testing.T) {
 
 func TestShouldReturnErrorWhenSendMalFormedBody(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(mockTests.CampaignServiceMock)
+	setup()
 
 	requestBody := strings.NewReader(`{
 		"name": "Campanha de teste",
@@ -107,12 +90,7 @@ func TestShouldReturnErrorWhenSendMalFormedBody(t *testing.T) {
 		]
 	}`)
 
-	controller := CampaignController{
-		CampaignService: serviceMocked,
-	}
-
-	req, _ := http.NewRequest("POST", "/campaign", requestBody)
-	res := httptest.NewRecorder()
+	req, res := newReqAndRecord("POST", "/campaign", requestBody)
 
 	json, status, err := controller.CampaignPost(res, req)
 

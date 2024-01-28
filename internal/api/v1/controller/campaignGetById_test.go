@@ -2,20 +2,18 @@ package controller
 
 import (
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/JulioZittei/go-job-mail-service/internal/domain/contract"
 	internalerrors "github.com/JulioZittei/go-job-mail-service/internal/domain/internalErrors"
 	"github.com/JulioZittei/go-job-mail-service/internal/domain/model"
-	mockTests "github.com/JulioZittei/go-job-mail-service/internal/test/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-func TestShouldACampaignById(t *testing.T) {
+func TestShouldStartCampaignById(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(mockTests.CampaignServiceMock)
+	setup()
 
 	expectedCampaign := &contract.CampaignOutput{
 		ID:      "idtest",
@@ -26,12 +24,7 @@ func TestShouldACampaignById(t *testing.T) {
 
 	serviceMocked.On("GetById", mock.Anything).Return(expectedCampaign, nil)
 
-	controller := CampaignController{
-		CampaignService: serviceMocked,
-	}
-
-	req, _ := http.NewRequest("GET", "/campaign/idtest", nil)
-	res := httptest.NewRecorder()
+	req, res := newReqAndRecord("GET", "/campaign/idtest", nil)
 
 	json, status, err := controller.CampaignGetById(res, req)
 
@@ -44,18 +37,13 @@ func TestShouldACampaignById(t *testing.T) {
 
 func TestShouldReturnErrorWhenGetCampaignById(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(mockTests.CampaignServiceMock)
+	setup()
 
 	expectedError := internalerrors.NewErrInternal()
 
 	serviceMocked.On("GetById", mock.Anything).Return(nil, expectedError)
 
-	controller := CampaignController{
-		CampaignService: serviceMocked,
-	}
-
-	req, _ := http.NewRequest("GET", "/campaign/idtest", nil)
-	res := httptest.NewRecorder()
+	req, res := newReqAndRecord("GET", "/campaign/idtest", nil)
 
 	json, status, err := controller.CampaignGetById(res, req)
 
@@ -67,18 +55,13 @@ func TestShouldReturnErrorWhenGetCampaignById(t *testing.T) {
 
 func TestShouldReturnCampaignNotFoundErrorWhemGettingById(t *testing.T) {
 	assert := assert.New(t)
-	serviceMocked := new(mockTests.CampaignServiceMock)
+	setup()
 
 	expectedError := internalerrors.NewErrCampaignNotFound()
 
 	serviceMocked.On("GetById", mock.Anything).Return(nil, expectedError)
 
-	controller := CampaignController{
-		CampaignService: serviceMocked,
-	}
-
-	req, _ := http.NewRequest("GET", "/campaign/idtest", nil)
-	res := httptest.NewRecorder()
+	req, res := newReqAndRecord("GET", "/campaign/idtest", nil)
 
 	json, status, err := controller.CampaignGetById(res, req)
 
