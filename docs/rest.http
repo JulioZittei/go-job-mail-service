@@ -16,6 +16,10 @@ Authorization: Bearer {{access_token}}
 GET {{baseUrl}}/campaign/cmkqa0q1jl97ujkjs340
 Authorization: Bearer {{access_token}}
 
+### START CAMPAIGNS
+PATCH {{baseUrl}}/campaign/cmr7a221jl91pg753d70
+Authorization: Bearer {{access_token}}
+
 ### POST CLIENT AUTHENTICATION
 POST {{identityProviderUrl}}/realms/mail-service-provider/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
