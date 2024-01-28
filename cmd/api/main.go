@@ -8,6 +8,7 @@ import (
 	exceptionhandler "github.com/JulioZittei/go-job-mail-service/internal/api/v1/exceptionHandler"
 	"github.com/JulioZittei/go-job-mail-service/internal/domain/service"
 	"github.com/JulioZittei/go-job-mail-service/internal/infrastructure/database"
+	"github.com/JulioZittei/go-job-mail-service/internal/infrastructure/mail"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
@@ -18,6 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -29,6 +31,7 @@ func main() {
 		Repository: &database.CampaignRepository{
 			Db: database.NewDB(),
 		},
+		SendMail: mail.SendMail,
 	}
 
 	campaigncController := &controller.CampaignController{
@@ -40,6 +43,7 @@ func main() {
 		r.Post("/", exceptionhandler.ExceptionHandler(campaigncController.CampaignPost))
 		r.Get("/{id}", exceptionhandler.ExceptionHandler(campaigncController.CampaignGetById))
 		r.Delete("/{id}", exceptionhandler.ExceptionHandler(campaigncController.CampaignDelete))
+		r.Patch("/{id}", exceptionhandler.ExceptionHandler(campaigncController.CampaignStart))
 	})
 
 	http.ListenAndServe(":3000", r)
