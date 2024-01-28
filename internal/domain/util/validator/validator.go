@@ -19,11 +19,11 @@ func ValidateStruct(obj interface{}) error {
 	validationErrors := err.(validator.ValidationErrors)
 
 	var errorsParam = make([]internalerrors.ErrorsParam,
-	len(validationErrors))
+		len(validationErrors))
 
 	for i, v := range validationErrors {
 		key := fmt.Sprint(v.Tag())
-		field := fmt.Sprint(strings.ToLower(v.Field()))
+		field := fmt.Sprint(strings.ToLower(v.Field()[0:1]) + v.Field()[1:])
 		paramValue := fmt.Sprint(v.Param())
 
 		message, err := message.GetMessage(strings.ToUpper(key), field, paramValue)
@@ -33,6 +33,6 @@ func ValidateStruct(obj interface{}) error {
 
 		errorsParam[i] = internalerrors.ErrorsParam{Param: field, Message: message}
 	}
-	
+
 	return internalerrors.NewErrValidation(errorsParam)
 }
