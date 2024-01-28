@@ -15,9 +15,10 @@ import (
 
 var (
 	newCampaign = &contract.NewCampaignInput{
-		Name:    "Campaign X",
-		Content: "Body Content",
-		Emails:  []string{"john@mail.com", "mary@mail.com"},
+		Name:      "Campaign X",
+		Content:   "Body Content",
+		Emails:    []string{"john@mail.com", "mary@mail.com"},
+		CreatedBy: "teste@teste.com",
 	}
 	service = CampaignServiceImpl{}
 )
@@ -76,7 +77,7 @@ func TestShouldGetCampaignById(t *testing.T) {
 	assert := assert.New(t)
 	mockedRepository := new(mockTests.CampaignRepositoryMock)
 
-	createdCampaign, _ := model.NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails)
+	createdCampaign, _ := model.NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails, newCampaign.CreatedBy)
 
 	mockedRepository.On("GetById", mock.MatchedBy(func(id string) bool {
 		return id == createdCampaign.ID
@@ -88,6 +89,7 @@ func TestShouldGetCampaignById(t *testing.T) {
 	assert.Nil(err)
 	assert.NotNil(campaign)
 	assert.Equal(createdCampaign.ID, campaign.ID)
+	assert.Equal(createdCampaign.CreatedBy, campaign.CreatedBy)
 	mockedRepository.AssertExpectations(t)
 }
 
@@ -127,7 +129,7 @@ func TestShouldDeleteCampaign(t *testing.T) {
 	assert := assert.New(t)
 	mockedRepository := new(mockTests.CampaignRepositoryMock)
 
-	expectedCampaign, _ := model.NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails)
+	expectedCampaign, _ := model.NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails, newCampaign.CreatedBy)
 
 	mockedRepository.On("GetById", mock.MatchedBy(func(id string) bool {
 		return id == expectedCampaign.ID
@@ -179,7 +181,7 @@ func TestShouldReturnErrorWhenStatusIsNotPending(t *testing.T) {
 	assert := assert.New(t)
 	mockedRepository := new(mockTests.CampaignRepositoryMock)
 
-	expectedCampaign, _ := model.NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails)
+	expectedCampaign, _ := model.NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails, newCampaign.CreatedBy)
 
 	expectedCampaign.Status = model.Started
 
@@ -197,7 +199,7 @@ func TestShouldReturnErrorWhenDeletingCampaign(t *testing.T) {
 	assert := assert.New(t)
 	mockedRepository := new(mockTests.CampaignRepositoryMock)
 
-	expectedCampaign, _ := model.NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails)
+	expectedCampaign, _ := model.NewCampaign(newCampaign.Name, newCampaign.Content, newCampaign.Emails, newCampaign.CreatedBy)
 
 	mockedRepository.On("GetById", mock.MatchedBy(func(id string) bool {
 		return id == expectedCampaign.ID

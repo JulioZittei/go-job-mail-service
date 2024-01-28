@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +17,16 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func setup(requestBody contract.NewCampaignInput, createdByExpected string) (*http.Request, *httptest.ResponseRecorder) {
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(requestBody)
+	req, _ := http.NewRequest("POST", "/campaign", &buf)
+	ctx := context.WithValue(req.Context(), EMAIL_KEY, createdByExpected)
+	req = req.WithContext(ctx)
+	res := httptest.NewRecorder()
+
+	return req, res
+}
 
 func TestShouldCreateAndSaveACampaign(t *testing.T) {
 	assert := assert.New(t)
@@ -25,18 +36,18 @@ func TestShouldCreateAndSaveACampaign(t *testing.T) {
 		"id": "idtest",
 	}
 
+	createdByExpected := "teste@teste.com"
+
 	requestBody := contract.NewCampaignInput{
-		Name: "Teste",
+		Name:    "Teste",
 		Content: "Content Test",
 		Emails: []string{
 			"john@mail.com",
 		},
 	}
-	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(requestBody)
 
 	serviceMocked.On("Create", mock.MatchedBy(func(campaign *contract.NewCampaignInput) bool {
-		if campaign.Name != requestBody.Name || campaign.Content != requestBody.Content || len(campaign.Emails) != len(requestBody.Emails) {
+		if campaign.Name != requestBody.Name || campaign.Content != requestBody.Content || len(campaign.Emails) != len(requestBody.Emails) || campaign.CreatedBy != createdByExpected {
 			return false
 		}
 		return true
@@ -46,8 +57,7 @@ func TestShouldCreateAndSaveACampaign(t *testing.T) {
 		CampaignService: serviceMocked,
 	}
 
-	req, _ := http.NewRequest("POST", "/campaign", &buf)
-	res := httptest.NewRecorder()
+	req, res := setup(requestBody, createdByExpected)
 
 	json, status, err := controller.CampaignPost(res, req)
 
@@ -60,15 +70,15 @@ func TestShouldReturnErrorWhenSaveACampaign(t *testing.T) {
 	assert := assert.New(t)
 	serviceMocked := new(mockTests.CampaignServiceMock)
 
+	createdByExpected := "teste@teste.com"
+
 	requestBody := contract.NewCampaignInput{
-		Name: "Teste",
+		Name:    "Teste",
 		Content: "Content Test",
 		Emails: []string{
 			"john@mail.com",
 		},
 	}
-	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(requestBody)
 
 	serviceMocked.On("Create", mock.Anything).Return("", internalerrors.NewErrInternal())
 
@@ -76,8 +86,7 @@ func TestShouldReturnErrorWhenSaveACampaign(t *testing.T) {
 		CampaignService: serviceMocked,
 	}
 
-	req, _ := http.NewRequest("POST", "/campaign", &buf)
-	res := httptest.NewRecorder()
+	req, res := setup(requestBody, createdByExpected)
 
 	json, status, err := controller.CampaignPost(res, req)
 
@@ -89,8 +98,8 @@ func TestShouldReturnErrorWhenSaveACampaign(t *testing.T) {
 func TestShouldReturnErrorWhenSendMalFormedBody(t *testing.T) {
 	assert := assert.New(t)
 	serviceMocked := new(mockTests.CampaignServiceMock)
-	
-	requestBody  := strings.NewReader(`{
+
+	requestBody := strings.NewReader(`{
 		"name": "Campanha de teste",
 		"content": "Conteúdo da campanha"
 		"emails": [
