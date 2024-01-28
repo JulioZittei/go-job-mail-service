@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/JulioZittei/go-job-mail-service/internal/api/v1/controller"
@@ -9,9 +10,14 @@ import (
 	"github.com/JulioZittei/go-job-mail-service/internal/infrastructure/database"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -25,13 +31,16 @@ func main() {
 		},
 	}
 
-	controller := &controller.CampaignController{
+	campaigncController := &controller.CampaignController{
 		CampaignService: &service,
 	}
 
-	r.Post("/campaign", exceptionhandler.ExceptionHandler(controller.CampaignPost))
-	r.Get("/campaign/{id}", exceptionhandler.ExceptionHandler(controller.CampaignGetById))
-	r.Delete("/campaign/{id}", exceptionhandler.ExceptionHandler(controller.CampaignDelete))
+	r.Route("/campaign", func(r chi.Router) {
+		r.Use(controller.Auth)
+		r.Post("/", exceptionhandler.ExceptionHandler(campaigncController.CampaignPost))
+		r.Get("/{id}", exceptionhandler.ExceptionHandler(campaigncController.CampaignGetById))
+		r.Delete("/{id}", exceptionhandler.ExceptionHandler(campaigncController.CampaignDelete))
+	})
 
 	http.ListenAndServe(":3000", r)
 }
