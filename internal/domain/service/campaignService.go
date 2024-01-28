@@ -14,10 +14,12 @@ type CampaignService interface {
 	Create(campaignInput *contract.NewCampaignInput) (id string, err error)
 	GetById(id string) (*contract.CampaignOutput, error)
 	Delete(id string) error
+	Start(id string) error
 }
 
 type CampaignServiceImpl struct {
 	Repository repository.Repository
+	SendMail   func(campaign *model.Campaign) error
 }
 
 func (s *CampaignServiceImpl) Create(campaignInput *contract.NewCampaignInput) (id string, err error) {
@@ -67,6 +69,33 @@ func (s *CampaignServiceImpl) Delete(id string) error {
 
 	campaign.Delete()
 	err = s.Repository.Delete(campaign)
+	if err != nil {
+		return internalerrors.NewErrInternal()
+	}
+
+	return nil
+}
+
+func (s *CampaignServiceImpl) Start(id string) error {
+	campaign, err := s.Repository.GetById(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return internalerrors.NewErrCampaignNotFound()
+		}
+		return internalerrors.NewErrInternal()
+	}
+
+	if campaign.Status != model.Pending {
+		return errors.New("campaign could not be started, because is not pending")
+	}
+
+	err = s.SendMail(campaign)
+	if err != nil {
+		return internalerrors.NewErrInternal()
+	}
+
+	campaign.Done()
+	err = s.Repository.Update(campaign)
 	if err != nil {
 		return internalerrors.NewErrInternal()
 	}
