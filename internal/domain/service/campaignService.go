@@ -21,7 +21,7 @@ type CampaignServiceImpl struct {
 }
 
 func (s *CampaignServiceImpl) Create(campaignInput *contract.NewCampaignInput) (id string, err error) {
-	campaign, err := model.NewCampaign(campaignInput.Name, campaignInput.Content, campaignInput.Emails)
+	campaign, err := model.NewCampaign(campaignInput.Name, campaignInput.Content, campaignInput.Emails, campaignInput.CreatedBy)
 	if err != nil {
 		return "", err
 	}
@@ -48,6 +48,7 @@ func (s *CampaignServiceImpl) GetById(id string) (*contract.CampaignOutput, erro
 		Content:      campaign.Content,
 		Status:       campaign.Status,
 		EmailsToSend: len(campaign.Contacts),
+		CreatedBy:    campaign.CreatedBy,
 	}, nil
 }
 

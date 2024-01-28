@@ -15,6 +15,10 @@ func (c *CampaignController) CampaignPost(w http.ResponseWriter, r *http.Request
 		return nil, http.StatusBadRequest, internalerrors.NewErrBadRequest()
 	}
 
+	userEmail := r.Context().Value(EMAIL_KEY).(string)
+
+	requestBody.CreatedBy = userEmail
+
 	id, err := c.CampaignService.Create(&requestBody)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
