@@ -6,4 +6,5 @@ type CampaignOutput struct {
 	Content      string `json:"content"`
 	Status       string `json:"status"`
 	EmailsToSend int    `json:"emailsToSend"`
+	CreatedBy    string `json:"createdBy"`
 }
