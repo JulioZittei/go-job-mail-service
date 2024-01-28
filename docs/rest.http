@@ -1,6 +1,9 @@
-### CREATE CAMPAIGN
-POST http://localhost:3000/campaign
+@baseUrl = http://localhost:3000
+@identityProviderUrl = http://localhost:8080
 
+### CREATE CAMPAIGN
+POST {{baseUrl}}/campaign
+Authorization: Bearer {{access_token}}
 {
 	"name": "Campanha de teste",
 	"content": "Conteúdo da campanha",
@@ -9,6 +12,22 @@ POST http://localhost:3000/campaign
 	]
 }
 
-
 ### GET CAMPAIGNS
-GET http://localhost:3000/campaign/cmkqa0q1jl97ujkjs340
+GET {{baseUrl}}/campaign/cmkqa0q1jl97ujkjs340
+Authorization: Bearer {{access_token}}
+
+### POST CLIENT AUTHENTICATION
+POST {{identityProviderUrl}}/realms/mail-service-provider/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=mail-service&client_secret=EZmqHPlVALyHDJ9JTQrEGkUaGilD3zdx&grant_type=client_credentials
+
+### POST USER AUTHENTICATION
+# @name token
+POST {{identityProviderUrl}}/realms/mail-service-provider/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=mail-service-user&username=julio.zittei96@gmail.com&password=123456&grant_type=password
+
+###
+@access_token = {{token.response.body.access_token}}
