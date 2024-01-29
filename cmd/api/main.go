@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/JulioZittei/go-job-mail-service/internal/api/v1/controller"
 	exceptionhandler "github.com/JulioZittei/go-job-mail-service/internal/api/v1/exceptionHandler"
@@ -46,5 +52,34 @@ func main() {
 		r.Patch("/{id}", exceptionhandler.ExceptionHandler(campaigncController.CampaignStart))
 	})
 
-	http.ListenAndServe(":3000", r)
+	server := &http.Server{
+		Addr:    ":3000",
+		Handler: r,
+	}
+
+	go func() {
+		fmt.Println("Starting Server")
+		if err := server.ListenAndServe(); err != nil && http.ErrServerClosed != err {
+			panic(err)
+		}
+
+	}()
+
+	stop := make(chan os.Signal, 1)
+
+	signal.Notify(stop, syscall.SIGTERM, os.Interrupt, syscall.SIGINT)
+
+	fmt.Println("Started")
+
+	<-stop
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	fmt.Println("ServerStopping...")
+
+	if err := server.Shutdown(ctx); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Server Stopped")
 }
