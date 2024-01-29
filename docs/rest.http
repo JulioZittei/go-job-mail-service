@@ -4,6 +4,7 @@
 ### CREATE CAMPAIGN
 POST {{baseUrl}}/campaign
 Authorization: Bearer {{access_token}}
+
 {
 	"name": "Campanha de teste",
 	"content": "Conteúdo da campanha",

@@ -8,4 +8,5 @@ type Repository interface {
 	Get() ([]model.Campaign, error)
 	GetById(id string) (*model.Campaign, error)
 	Delete(campaign *model.Campaign) error
+	GetCampaignToBeSent() ([]model.Campaign, error)
 }

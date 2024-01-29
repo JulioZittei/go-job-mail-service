@@ -76,6 +76,16 @@ func (s *CampaignServiceImpl) Delete(id string) error {
 	return nil
 }
 
+func (s *CampaignServiceImpl) SendMailAndUpdateStatus(campaignSaved *model.Campaign) {
+	err := s.SendMail(campaignSaved)
+	if err != nil {
+		campaignSaved.Failed()
+	} else {
+		campaignSaved.Done()
+	}
+	s.Repository.Update(campaignSaved)
+}
+
 func (s *CampaignServiceImpl) Start(id string) error {
 	campaign, err := s.Repository.GetById(id)
 	if err != nil {
@@ -89,12 +99,9 @@ func (s *CampaignServiceImpl) Start(id string) error {
 		return errors.New("campaign could not be started, because is not pending")
 	}
 
-	err = s.SendMail(campaign)
-	if err != nil {
-		return internalerrors.NewErrInternal()
-	}
+	go s.SendMailAndUpdateStatus(campaign)
 
-	campaign.Done()
+	campaign.Start()
 	err = s.Repository.Update(campaign)
 	if err != nil {
 		return internalerrors.NewErrInternal()

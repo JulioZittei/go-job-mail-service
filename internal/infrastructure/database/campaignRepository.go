@@ -36,3 +36,9 @@ func (cr *CampaignRepository) Delete(campaign *model.Campaign) error {
 	tx := cr.Db.Select("Contacts").Delete(campaign)
 	return tx.Error
 }
+
+func (cr *CampaignRepository) GetCampaignToBeSent() ([]model.Campaign, error) {
+	var campaigns []model.Campaign
+	tx := cr.Db.Preload("Contacts").Find(&campaigns, "status = ? and date_part('minute', now()::timestamp - updated_at::timestamp) > ?", model.Started, 1)
+	return campaigns, tx.Error
+}
